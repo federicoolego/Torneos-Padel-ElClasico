@@ -5,7 +5,7 @@ import type { Cancha, PartidoVista, Sede } from '../../lib/types'
 import { aInputLocal, desdeInputLocal } from '../../lib/formato'
 import { resumenSets } from '../../lib/resultado'
 import { Alerta, Button, Card, Input, Select, Vacio } from '../ui'
-import { etiquetaPartido } from '../Partidos'
+import { etiquetaPartido, nombreLado } from '../Partidos'
 import { Horario } from './ArmadoZonas'
 
 const TZ = 'America/Argentina/Buenos_Aires'
@@ -83,9 +83,9 @@ export function FilaProgramacion({
     <div className={`grid gap-3 rounded-xl bg-white p-4 ring-1 lg:grid-cols-[1.4fr_2fr_auto] lg:items-start ${avisos.length ? 'ring-amber-400' : 'ring-noche/10'}`}>
       <div className="min-w-0">
         <p className="font-display text-lg font-semibold">{etiquetaPartido(p)}</p>
-        {[[p.pareja_a, p.pareja_a_id], [p.pareja_b, p.pareja_b_id]].map(([n, pid], k) => (
+        {([['a', p.pareja_a, p.pareja_a_id], ['b', p.pareja_b, p.pareja_b_id]] as const).map(([lado, n, pid], k) => (
           <div key={k} className="mt-1 text-sm">
-            <span className={n ? 'font-medium' : 'italic text-noche/45'}>{n ?? 'A definir'}</span>
+            <span className={n ? 'font-medium' : 'italic text-noche/45'}>{nombreLado(p, lado)}</span>
             {pid && <Horario texto={horarios[pid] ?? ''} compacto />}
           </div>
         ))}
@@ -165,7 +165,7 @@ export function OcupacionCanchas({ ocupados, sedes, tcActual, dias }: { ocupados
                         {aca.map((p) => (
                           <div key={p.id} className={`mb-1 rounded-md px-2 py-1 ${aca.length > 1 ? 'bg-amber-100 ring-1 ring-amber-400' : p.torneo_categoria_id === tcActual ? 'bg-cancha text-white' : 'bg-noche/5'}`}>
                             <p className="font-semibold">{p.categoria} · {etiquetaPartido(p)}</p>
-                            <p className="truncate opacity-75">{p.pareja_a ?? 'A definir'} vs {p.pareja_b ?? 'A definir'}</p>
+                            <p className="truncate opacity-75">{nombreLado(p, 'a')} vs {nombreLado(p, 'b')}</p>
                           </div>
                         ))}
                       </td>

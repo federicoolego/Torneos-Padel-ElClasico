@@ -186,7 +186,7 @@ export default function ArmadoZonas({
           {errores.length ? errores[0] : `${zonas.length} zonas · clasifican ${clasifican} al playoff`}
         </p>
         <Button
-          onClick={() => (!inicial.length || confirm('Se reemplazan las zonas actuales. Se conserva sede y horario de los partidos que no cambian de parejas. ¿Continuar?')) && onGuardar(zonas)}
+          onClick={() => (!inicial.length || confirm('Se reemplazan las zonas actuales. Se conserva sede y horario de los partidos de zona que no cambian de parejas; si había un cuadro de playoff armado, hay que volver a armarlo. ¿Continuar?')) && onGuardar(zonas)}
           disabled={errores.length > 0 || !cambiado}
           cargando={trabajando}
         >

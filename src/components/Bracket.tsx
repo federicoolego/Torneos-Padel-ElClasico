@@ -5,8 +5,8 @@ import { setsDe } from '../lib/resultado'
 function Caja({ p, onClick, resaltarIds }: { p: PartidoVista; onClick?: () => void; resaltarIds: string[] }) {
   const sets = setsDe(p).filter(([a, b]) => a !== null && b !== null)
   const lados = [
-    { id: p.pareja_a_id, n: p.pareja_a },
-    { id: p.pareja_b_id, n: p.pareja_b },
+    { id: p.pareja_a_id, n: p.pareja_a, o: p.origen_a },
+    { id: p.pareja_b_id, n: p.pareja_b, o: p.origen_b },
   ]
   return (
     <button
@@ -20,7 +20,7 @@ function Caja({ p, onClick, resaltarIds }: { p: PartidoVista; onClick?: () => vo
         return (
           <div key={i} className={`flex items-center border-noche/10 ${i === 0 ? 'border-b' : ''} ${gano ? 'bg-pelota/35' : ''} ${l.id && resaltarIds.includes(l.id) ? 'outline outline-2 -outline-offset-2 outline-cancha' : ''}`}>
             <span className={`min-w-0 flex-1 truncate px-2.5 py-1.5 text-sm ${gano ? 'font-semibold' : ''} ${l.n ? '' : 'italic text-noche/40'}`}>
-              {l.n ?? (p.estado === 'bye' ? 'Libre' : 'A definir')}
+              {l.n ?? l.o ?? (p.estado === 'bye' ? 'Libre' : 'A definir')}
             </span>
             {p.estado === 'wo' && gano && <span className="px-2 font-display text-sm font-semibold">W.O.</span>}
             {sets.map(([a, b], k) => {

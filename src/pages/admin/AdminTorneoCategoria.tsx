@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Phone, Trophy, UserPlus } from 'lucide-react'
+import { ArrowLeft, Phone, UserPlus } from 'lucide-react'
 import { supabase, mensajeError } from '../../lib/supabase'
 import type { InscriptoAdmin, PartidoVista, Sede, Torneo, TorneoCategoriaVista, Zona } from '../../lib/types'
 import { ESTADO_CATEGORIA_LABEL, fechaHora } from '../../lib/formato'
-import { Alerta, Badge, Button, Card, Spinner, Tabs, Titulo, Vacio } from '../../components/ui'
+import { Alerta, Badge, Button, Spinner, Tabs, Titulo, Vacio } from '../../components/ui'
 import { ZonaTabla } from '../../components/Zonas'
 import ArmadoZonas, { Horario } from '../../components/admin/ArmadoZonas'
 import Programacion from '../../components/admin/Programacion'
 import InscribirPareja from '../../components/admin/InscribirPareja'
+import ArmadoCuadro from '../../components/admin/ArmadoCuadro'
 import Bracket from '../../components/Bracket'
 import ResultadoModal from '../../components/ResultadoModal'
 
@@ -173,17 +174,23 @@ export default function AdminTorneoCategoria() {
 
         {tab === 'playoff' && (
           <div className="space-y-4">
-            <Card className="flex flex-wrap items-center justify-between gap-4">
-              <div className="max-w-xl text-sm text-noche/75">
-                <p className="font-display text-xl font-semibold text-noche">Cuadro de playoff</p>
-                Clasifican 1° y 2° de zonas de 3, y 1°, 2° y 3° de zonas de 4. Primero van los 1° de zona, después los 2° y los 3°; si faltan parejas para completar el cuadro, los mejores pasan directo.
-                {pendientesZona > 0 && <p className="mt-2 text-amber-800">Faltan {pendientesZona} resultados de zona.</p>}
-                {sinZona > 0 && <p className="mt-2 text-amber-800">Hay {sinZona} pareja(s) inscriptas sin zona: ubicalas en la pestaña Zonas.</p>}
-              </div>
-              <Button onClick={() => (playoff.length === 0 || confirm('Se va a regenerar el cuadro. ¿Continuar?')) && ejecutar(() => supabase.rpc('generar_playoff', { p_torneo_categoria: tc.id }), 'Cuadro generado')} disabled={pendientesZona > 0 || zonas.length === 0 || sinZona > 0} cargando={trabajando}>
-                <Trophy className="h-4 w-4" aria-hidden /> {playoff.length ? 'Regenerar cuadro' : 'Generar cuadro'}
-              </Button>
-            </Card>
+            {zonas.length === 0 ? (
+              <Vacio titulo="Todavía no hay zonas">Armá las zonas para poder definir los cruces del playoff.</Vacio>
+            ) : sinZona > 0 ? (
+              <Alerta tipo="aviso">Hay {sinZona} pareja(s) inscriptas sin zona: ubicalas en la pestaña Zonas antes de armar el cuadro.</Alerta>
+            ) : playoff.some((p) => p.estado === 'finalizado' || p.estado === 'wo') ? (
+              <Alerta>El playoff ya tiene resultados cargados: el cuadro no se puede modificar.</Alerta>
+            ) : (tc.estado === 'zonas' || tc.estado === 'playoff') && (
+              <ArmadoCuadro
+                zonas={zonas}
+                playoff={playoff}
+                trabajando={trabajando}
+                onGuardar={(cruces) => ejecutar(
+                  () => supabase.rpc('armar_cuadro', { p_torneo_categoria: tc.id, p_cruces: cruces }),
+                  pendientesZona > 0 ? 'Cuadro guardado. Los clasificados se van a ubicar solos cuando termine cada zona.' : 'Cuadro guardado',
+                )}
+              />
+            )}
             {playoff.length > 0 && <Bracket partidos={playoff} onElegir={setElegido} />}
           </div>
         )}

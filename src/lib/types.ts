@@ -197,6 +197,14 @@ export interface PartidoVista {
   pareja_b_j2_id: string | null
   /** null = formato estándar (al mejor de 3); número = set único a N games */
   games_set_unico: number | null
+  /** primera ronda de playoff: de qué zona y posición sale cada lado */
+  origen_a_zona_id: string | null
+  origen_a_pos: number | null
+  origen_b_zona_id: string | null
+  origen_b_pos: number | null
+  /** texto para mostrar mientras no se sabe la pareja: "1° Zona A", "Ganador Cuartos 2" */
+  origen_a: string | null
+  origen_b: string | null
 }
 
 export interface InscriptoAdmin {

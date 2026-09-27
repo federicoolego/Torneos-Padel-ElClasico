@@ -8,7 +8,7 @@ import {
   DIAS_CORTOS, diaCorto, diaDe, diaLargo, diaSemana, horaDe, hoy, inicioDia, lunesDe, nombreMes, primeroDeMes, sumarDias, sumarMeses,
 } from '../lib/fechas'
 import { Alerta, Select, Spinner, Titulo } from '../components/ui'
-import { etiquetaPartido } from '../components/Partidos'
+import { etiquetaPartido, nombreLado } from '../components/Partidos'
 import ResultadoModal from '../components/ResultadoModal'
 
 type Vista = 'dia' | 'semana' | 'mes'
@@ -149,8 +149,8 @@ function Tarjeta({ p, ahora, onAbrir, puedeCargar, compacta = false }: { p: Part
         <span className="num font-display text-sm font-bold">{horaDe(p.fecha_hora!)}</span>
         <span className="truncate font-semibold text-noche/70">{p.categoria}</span>
       </div>
-      <p className={`mt-0.5 truncate font-medium ${compacta ? 'text-xs' : 'text-sm'}`}>{p.pareja_a ?? 'A definir'}</p>
-      <p className={`truncate font-medium ${compacta ? 'text-xs' : 'text-sm'}`}>{p.pareja_b ?? 'A definir'}</p>
+      <p className={`mt-0.5 truncate font-medium ${compacta ? 'text-xs' : 'text-sm'}`}>{nombreLado(p, 'a')}</p>
+      <p className={`truncate font-medium ${compacta ? 'text-xs' : 'text-sm'}`}>{nombreLado(p, 'b')}</p>
       {!compacta && (
         <p className="mt-1 flex items-center gap-1 truncate text-xs text-noche/55">
           <MapPin className="h-3 w-3 shrink-0" aria-hidden />{p.sede ?? 'Sin sede'}{p.cancha && ` · ${p.cancha}`} · {etiquetaPartido(p)}

@@ -12,12 +12,19 @@ export function etiquetaPartido(p: PartidoVista): string {
     const extra = p.tipo_zona === 'ganadores' ? ' · Ganadores' : p.tipo_zona === 'perdedores' ? ' · Perdedores' : ''
     return `Zona ${p.zona}${extra}`
   }
-  return FASE_LABEL[p.fase]
+  return p.fase === 'final' ? FASE_LABEL[p.fase] : `${FASE_LABEL[p.fase]} ${p.orden}`
+}
+
+/** Nombre de la pareja, o de dónde sale ("1° Zona A", "Ganador Cuartos 2") mientras no se sabe */
+export function nombreLado(p: PartidoVista, lado: 'a' | 'b'): string {
+  return nombreSlot(p, lado)
 }
 
 function nombreSlot(p: PartidoVista, lado: 'a' | 'b'): string {
   const n = lado === 'a' ? p.pareja_a : p.pareja_b
   if (n) return n
+  const o = lado === 'a' ? p.origen_a : p.origen_b
+  if (o) return o
   if (p.estado === 'bye') return 'Libre'
   if (p.tipo_zona === 'ganadores') return lado === 'a' ? 'Ganador partido 1' : 'Ganador partido 2'
   if (p.tipo_zona === 'perdedores') return lado === 'a' ? 'Perdedor partido 1' : 'Perdedor partido 2'
