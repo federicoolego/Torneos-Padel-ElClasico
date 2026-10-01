@@ -59,9 +59,13 @@ export default function Calendario() {
   const ahora = Date.now()
   const torneos = useMemo(() => [...new Map((partidos ?? []).map((p) => [p.torneo_id, p.torneo])).entries()], [partidos])
   const sedes = useMemo(() => [...new Set((partidos ?? []).map((p) => p.sede).filter(Boolean))] as string[], [partidos])
-  const lista = (partidos ?? []).filter((p) =>
-    (!torneo || p.torneo_id === torneo) && (!sede || p.sede === sede) && (!soloFalta || estadoDe(p, ahora) === 'falta'))
-  const faltan = (partidos ?? []).filter((p) => (!torneo || p.torneo_id === torneo) && (!sede || p.sede === sede) && estadoDe(p, ahora) === 'falta').length
+  // "Sin resultado": partidos pendientes que ya tienen las dos parejas (se pueden cargar),
+  // jugados o por jugar. Los que ya pasaron de horario se ven en ámbar.
+  const sinResultado = (p: PartidoVista) => p.estado === 'pendiente' && !!p.pareja_a_id && !!p.pareja_b_id
+  const enFiltros = (partidos ?? []).filter((p) => (!torneo || p.torneo_id === torneo) && (!sede || p.sede === sede))
+  const lista = enFiltros.filter((p) => !soloFalta || sinResultado(p))
+  const pendientes = enFiltros.filter(sinResultado).length
+  const atrasados = enFiltros.filter((p) => sinResultado(p) && estadoDe(p, ahora) === 'falta').length
 
   const puedeCargar = (p: PartidoVista) =>
     !!p.pareja_a_id && !!p.pareja_b_id && (esAdmin || p.estado === 'pendiente')
@@ -104,11 +108,17 @@ export default function Calendario() {
           {sedes.map((s) => <option key={s} value={s}>{s}</option>)}
         </Select></div>
         <button onClick={() => setSoloFalta(!soloFalta)} aria-pressed={soloFalta}
-          className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 ${soloFalta ? 'bg-amber-100 text-amber-900 ring-amber-300' : 'bg-white text-noche ring-noche/15'}`}>
-          <span className="h-2 w-2 rounded-full bg-amber-500" /> Falta resultado <span className="num">({faltan})</span>
+          title="Partidos con las dos parejas definidas y sin resultado cargado"
+          className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 ${soloFalta ? 'bg-cancha text-white ring-cancha' : 'bg-white text-cancha ring-noche/15'}`}>
+          <Pencil className="h-3.5 w-3.5" aria-hidden /> Sin resultado <span className="num">({pendientes})</span>
+          {atrasados > 0 && (
+            <span className="num ml-0.5 inline-flex items-center gap-1 rounded-full bg-amber-100 px-1.5 text-[11px] text-amber-900">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />{atrasados} atrasado{atrasados === 1 ? '' : 's'}
+            </span>
+          )}
         </button>
         <span className="ml-auto hidden items-center gap-3 text-xs text-noche/55 sm:flex">
-          <Leyenda e="proximo" t="Por jugar" /><Leyenda e="falta" t="Falta resultado" /><Leyenda e="jugado" t="Con resultado" />
+          <Leyenda e="proximo" t="Por jugar" /><Leyenda e="falta" t="Ya pasó, sin resultado" /><Leyenda e="jugado" t="Con resultado" />
         </span>
       </div>
 
