@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase, dniAEmail, mensajeError } from '../lib/supabase'
 import { Alerta, Button, Field, Input } from '../components/ui'
 import { Marca } from '../components/Layout'
+import Firma from '../components/Firma'
 
 export function PantallaAcceso({ children }: { children: React.ReactNode }) {
   return (
@@ -32,6 +33,7 @@ export function PantallaAcceso({ children }: { children: React.ReactNode }) {
         <div className="w-full max-w-sm">
           <div className="mb-10"><Marca oscuro={false} /></div>
           {children}
+          <Firma className="mt-10" />
         </div>
       </div>
     </div>
