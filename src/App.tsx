@@ -22,6 +22,7 @@ import AdminEstadisticas from './pages/admin/AdminEstadisticas'
 import Calendario from './pages/Calendario'
 import Jugadores from './pages/Jugadores'
 import AdminLogs from './pages/admin/AdminLogs'
+import Ayuda from './pages/Ayuda'
 
 function Privada({ children, soloAdmin, soloEditor }: { children: ReactNode; soloAdmin?: boolean; soloEditor?: boolean }) {
   const { session, jugador, cargando, esAdmin, esEditor } = useAuth()
@@ -63,6 +64,9 @@ export default function App() {
         <Route path="/mis-torneos" element={<MisTorneos />} />
         <Route path="/jugadores" element={<Privada><Jugadores /></Privada>} />
         <Route path="/calendario" element={<Privada soloEditor><Calendario /></Privada>} />
+        <Route path="/ayuda" element={<Ayuda para="jugador" />} />
+        <Route path="/ayuda/editor" element={<Privada soloEditor><Ayuda para="editor" /></Privada>} />
+        <Route path="/ayuda/admin" element={<Privada soloAdmin><Ayuda para="admin" /></Privada>} />
         <Route path="/admin/torneos" element={<Privada soloAdmin><AdminTorneos /></Privada>} />
         <Route path="/admin/torneos/nuevo" element={<Privada soloAdmin><TorneoForm /></Privada>} />
         <Route path="/admin/torneos/:id" element={<Privada soloAdmin><TorneoForm /></Privada>} />

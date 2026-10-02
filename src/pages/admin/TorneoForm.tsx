@@ -7,6 +7,13 @@ import type { Categoria, EstadoTorneo, Torneo, TorneoCategoriaVista } from '../.
 import { aInputLocal, desdeInputLocal, ESTADO_TORNEO_LABEL } from '../../lib/formato'
 import { Alerta, Button, Card, Field, Input, Select, Spinner, Textarea, Titulo } from '../../components/ui'
 
+/** 'YYYY-MM-DD' → el día anterior, en el mismo formato */
+function diaAnterior(fecha: string) {
+  const d = new Date(`${fecha}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
 interface CatForm { activa: boolean; cupo_max: number; cupo_min: number; tcId?: string; inscriptas: number }
 
 export default function TorneoForm() {
@@ -55,7 +62,13 @@ export default function TorneoForm() {
     e.preventDefault()
     setError(''); setOk('')
     const fechaHasta = f.americano ? f.fecha_desde : f.fecha_hasta
+    if (!f.fecha_desde) return setError(f.americano ? 'Completá la fecha del torneo' : 'Completá la fecha de inicio del torneo')
+    if (!fechaHasta) return setError('Completá la fecha de fin del torneo')
+    if (!f.cierre) return setError('Completá la fecha y hora de cierre de inscripción')
     if (fechaHasta < f.fecha_desde) return setError('La fecha hasta no puede ser anterior a la fecha desde')
+    // f.cierre viene del datetime-local ('YYYY-MM-DDTHH:mm'): sus 10 primeros caracteres son la fecha
+    if (f.cierre.slice(0, 10) >= fechaHasta)
+      return setError(`El cierre de inscripción tiene que ser anterior a la fecha de fin del torneo (${fechaHasta.split('-').reverse().join('/')})`)
     if (!Object.values(cats).some((c) => c.activa)) return setError('Habilitá al menos una categoría')
     const quitadasConInscriptos = Object.entries(cats).filter(([, c]) => !c.activa && c.tcId && c.inscriptas > 0)
     if (quitadasConInscriptos.length) return setError('No podés quitar categorías que ya tienen parejas inscriptas')
@@ -90,6 +103,9 @@ export default function TorneoForm() {
   }
 
   if (cargando) return <Spinner />
+  /** Último momento válido para el cierre: el día anterior a la fecha de fin */
+  const finTorneo = f.americano ? f.fecha_desde : f.fecha_hasta
+  const maxCierre = finTorneo ? `${diaAnterior(finTorneo)}T23:59` : undefined
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value })
 
   return (
@@ -126,7 +142,9 @@ export default function TorneoForm() {
                 <Field label="Fecha hasta"><Input type="date" value={f.fecha_hasta} onChange={set('fecha_hasta')} required /></Field>
               </>
             )}
-            <Field label="Cierre de inscripción" hint="Fecha y hora; después no se puede cancelar ni editar."><Input type="datetime-local" value={f.cierre} onChange={set('cierre')} required /></Field>
+            <Field label="Cierre de inscripción" hint="Fecha y hora, anterior a la fecha de fin del torneo. Después del cierre no se puede cancelar ni editar.">
+              <Input type="datetime-local" value={f.cierre} onChange={set('cierre')} max={maxCierre} required />
+            </Field>
             <Field label="Precio de inscripción (por pareja)"><Input type="number" min="0" step="100" value={f.precio} onChange={set('precio')} /></Field>
             <div className="sm:col-span-2"><Field label="Observaciones"><Textarea value={f.observaciones} onChange={set('observaciones')} placeholder="Premios, pelotas, reglamento, etc." /></Field></div>
             <div className="sm:col-span-2">

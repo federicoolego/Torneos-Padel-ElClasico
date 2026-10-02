@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Trophy, ClipboardList, Users, CalendarDays, UserRound, LogOut, Settings2, IdCard, MapPin, Layers, ShieldCheck, X, BarChart3, CalendarRange, ScrollText, Contact } from 'lucide-react'
+import { Trophy, ClipboardList, Users, CalendarDays, UserRound, LogOut, Settings2, IdCard, MapPin, Layers, ShieldCheck, X, BarChart3, CalendarRange, ScrollText, Contact, HelpCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { ROL_LABEL } from '../lib/formato'
+import { CLUB, logoUrl } from '../lib/club'
 import Firma from './Firma'
 
 const MENU = [
@@ -13,6 +14,11 @@ const MENU = [
   { to: '/jugadores', label: 'Jugadores', icono: Contact },
   { to: '/perfil', label: 'Perfil', icono: UserRound },
 ]
+
+/** Ayuda de cada sección del menú: jugador (todos), resultados (editor) y administración */
+const AYUDA = { to: '/ayuda', label: 'Ayuda', icono: HelpCircle, end: true }
+const AYUDA_EDITOR = { to: '/ayuda/editor', label: 'Ayuda', icono: HelpCircle }
+const AYUDA_ADMIN = { to: '/ayuda/admin', label: 'Ayuda', icono: HelpCircle }
 
 /** En el celu Perfil va arriba (junto a cerrar sesión) para no pasar de 5 íconos + staff abajo */
 const MENU_MOVIL = MENU.filter((m) => m.to !== '/perfil')
@@ -29,10 +35,11 @@ const ADMIN = [
   { to: '/admin/logs', label: 'Logs', icono: ScrollText },
 ]
 
-function Enlace({ to, label, icono: Icono }: (typeof MENU)[number]) {
+function Enlace({ to, label, icono: Icono, end }: (typeof MENU)[number] & { end?: boolean }) {
   return (
     <NavLink
       to={to}
+      end={end}
       className={({ isActive }) =>
         `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
           isActive ? 'bg-white/10 text-white' : 'text-white/65 hover:bg-white/5 hover:text-white'
@@ -60,12 +67,14 @@ export default function Layout() {
         <Marca />
         <nav className="mt-8 flex flex-col gap-1" aria-label="Principal">
           {MENU.map((m) => <Enlace key={m.to} {...m} />)}
+          <Enlace {...AYUDA} />
         </nav>
         {esEditor && (
           <nav className="mt-8 flex flex-col gap-1" aria-label="Administración">
             <p className="px-3 pb-1 text-xs font-medium text-white/40">{esAdmin ? 'Administración' : 'Resultados'}</p>
             <Enlace {...CALENDARIO} />
             {esAdmin && ADMIN.map((m) => <Enlace key={m.to} {...m} />)}
+            <Enlace {...(esAdmin ? AYUDA_ADMIN : AYUDA_EDITOR)} />
           </nav>
         )}
         <div className="mt-auto border-t border-white/10 pt-4">
@@ -84,6 +93,7 @@ export default function Layout() {
       <header className="flex items-center justify-between bg-noche px-4 py-3 lg:hidden" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         <Marca />
         <div className="flex items-center gap-3">
+          <NavLink to="/ayuda" end aria-label="Ayuda" className={({ isActive }) => (isActive ? 'text-pelota' : 'text-white/70')}><HelpCircle className="h-5 w-5" /></NavLink>
           <NavLink to="/perfil" aria-label="Perfil" className={({ isActive }) => (isActive ? 'text-pelota' : 'text-white/70')}><UserRound className="h-5 w-5" /></NavLink>
           <button onClick={salir} aria-label="Cerrar sesión" className="text-white/70"><LogOut className="h-5 w-5" /></button>
         </div>
@@ -127,7 +137,7 @@ export default function Layout() {
           <button
             onClick={() => setAdminAbierto(true)}
             aria-haspopup="dialog"
-            className={`flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium leading-tight ${enAdmin || pathname === '/calendario' ? 'text-cancha' : 'text-noche/55'}`}
+            className={`flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium leading-tight ${enAdmin || pathname === '/calendario' || pathname === '/ayuda/admin' ? 'text-cancha' : 'text-noche/55'}`}
           >
             <ShieldCheck className="h-5 w-5" aria-hidden />
             <span>Admin</span>
@@ -153,6 +163,7 @@ export default function Layout() {
             <nav className="flex flex-col gap-1" aria-label="Administración">
               <Enlace {...CALENDARIO} />
               {ADMIN.map((m) => <Enlace key={m.to} {...m} />)}
+              <Enlace {...AYUDA_ADMIN} />
             </nav>
           </div>
         </div>
@@ -165,11 +176,11 @@ export function Marca({ oscuro = true }: { oscuro?: boolean }) {
   return (
     <div className="flex items-center gap-3">
       <img
-        src={`${import.meta.env.BASE_URL}logo-el-clasico.webp`}
-        alt="El Clásico Fútbol & Pádel"
+        src={logoUrl()}
+        alt={CLUB.nombreCompleto}
         width={44}
         height={44}
-        className={`h-11 w-11 shrink-0 ${oscuro ? '' : 'rounded-lg'}`}
+        className="h-11 w-11 shrink-0 rounded-lg"
       />
       <div className="leading-none">
         <span className={`block font-display text-2xl font-bold ${oscuro ? 'text-white' : 'text-noche'}`}>Torneos de Pádel</span>
