@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom' 
 import { AlertTriangle, ArrowRight, BookOpen } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { AYUDA_ADMIN, AYUDA_EDITOR, AYUDA_JUGADOR, type Ayuda as AyudaContenido } from '../lib/ayuda'
