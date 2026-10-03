@@ -3,7 +3,6 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Trophy, ClipboardList, Users, CalendarDays, UserRound, LogOut, Settings2, IdCard, MapPin, Layers, ShieldCheck, X, BarChart3, CalendarRange, ScrollText, Contact, HelpCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { ROL_LABEL } from '../lib/formato'
-import { CLUB, logoUrl } from '../lib/club'
 import Firma from './Firma'
 
 const MENU = [
@@ -176,11 +175,11 @@ export function Marca({ oscuro = true }: { oscuro?: boolean }) {
   return (
     <div className="flex items-center gap-3">
       <img
-        src={logoUrl()}
-        alt={CLUB.nombreCompleto}
+        src={`${import.meta.env.BASE_URL}logo-el-clasico.webp`}
+        alt="El Clásico Fútbol & Pádel"
         width={44}
         height={44}
-        className="h-11 w-11 shrink-0 rounded-lg"
+        className={`h-11 w-11 shrink-0 ${oscuro ? '' : 'rounded-lg'}`}
       />
       <div className="leading-none">
         <span className={`block font-display text-2xl font-bold ${oscuro ? 'text-white' : 'text-noche'}`}>Torneos de Pádel</span>
